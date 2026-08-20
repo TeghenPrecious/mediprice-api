@@ -54,7 +54,9 @@ export async function getMedications(req, res, next) {
     }
 
     res.status(200).json({
-      medication
+      success: true,
+      data: medication,
+      message: "Medications retrieved successfully"
     });
   } catch (error) {
     console.log(error);
@@ -70,7 +72,9 @@ export async function getMedication(req, res, next) {
       return res.status(404).json({ message: 'Medication not found' });
     }
     res.status(200).json({
-      medication
+      success: true,
+      data: medication,
+      message: "Medications retrieved successfully"
     });
   } catch (error) {
     console.log(error);
