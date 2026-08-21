@@ -2,34 +2,17 @@ import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: ["lab", "care"],
-      required: true,
-    },
-    category: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    createdAt: {
-        type: Date,
-        required: true,
-    },
-    updatedAt: {
-        type: Date,
-        required: true,
-    }
-}
+    name: { type: String, required: true, },
+    type: { type: String, enum: ["lab", "care"], required: true, },
+    category: { type: String, required: true },
+    description: { type: String, required: true, },
+},
+{ timestamps: true }
 );
 
-const Medication = mongoose.model('Medication', medicationSchema);
+serviceSchema.index({ name: 'text' });
+serviceSchema.index({ type: 1, category: 1, });
 
-export default Medication;
+const Service = mongoose.model('Service', serviceSchema);
+
+export default Service;
