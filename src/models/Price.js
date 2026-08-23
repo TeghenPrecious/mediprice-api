@@ -24,7 +24,8 @@ const priceSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
-}
+},
+{ timestamps: true, }
 );
 
 // priceSchema.virtual('itemType').get(function() {
