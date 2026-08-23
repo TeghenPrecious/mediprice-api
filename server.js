@@ -5,6 +5,7 @@ import cors from 'cors';
 import { connectDB } from './src/config/db.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 import healthRoutes from './src/routes/health.routes.js';
+import medicationRoutes from './src/routes/medication.routes.js';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use(express.json());
 
 app.use('/api/health', healthRoutes);
+app.use('/api/medications', medicationRoutes);
 
 // Fire off the DB connection without blocking server startup — connectDB
 // logs its own errors and never throws, so a missing/unreachable Mongo
