@@ -6,6 +6,10 @@ import { connectDB } from './src/config/db.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 import healthRoutes from './src/routes/health.routes.js';
 import medicationRoutes from './src/routes/medication.routes.js';
+import serviceRoutes from './src/routes/service.routes.js';
+import priceRoutes from './src/routes/price.routes.js';
+import providerRoutes from './src/routes/provider.routes.js';
+import compareRoutes from './src/routes/compare.routes.js';
 
 const app = express();
 
@@ -14,6 +18,10 @@ app.use(express.json());
 
 app.use('/api/health', healthRoutes);
 app.use('/api/medications', medicationRoutes);
+app.use('/api/services', serviceRoutes)
+app.use('/api/prices', priceRoutes);
+app.use('/api/providers', providerRoutes);
+app.use('/api/compare', compareRoutes);
 
 // Fire off the DB connection without blocking server startup — connectDB
 // logs its own errors and never throws, so a missing/unreachable Mongo
@@ -28,3 +36,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`MediPrice API listening on port ${PORT}`);
 });
+

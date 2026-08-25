@@ -11,32 +11,28 @@ const providerSchema = new mongoose.Schema(
       enum: ["pharmacy", "lab", "care"],
       required: true,
     },
-    quarter: {
-        type: String,
-    },
+    quarter: String,
+    address: String,
     city: {
         type: String,
         default: "Bamenda",
         required: true,
     },
     location: {
-        lat: Number,
-        lng: Number
+        lat: { type: Number },
+        lng: { type: Number }
     },
     phone:{
         type: String,
         required: true, 
     },
-    createdAt: {
-        type: Date,
-        required: true,
-    },
-    updatedAt: {
-        type: Date,
-        required: true,
-    }
-}
+  },
+  {
+    timestamps: true,
+  }
 );
+
+// providerSchema.index({ location: '2dsphere'});
 
 const Provider = mongoose.model('Provider', providerSchema);
 

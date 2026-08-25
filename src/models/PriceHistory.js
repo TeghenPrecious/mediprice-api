@@ -16,16 +16,15 @@ const priceHistorySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    currency: {
-      type: String,
-      default: "XAF",
+    
     },
-    createdAt: {
-        type: Date,
-        required: true,
+    {
+      timestamps: true
     },
-}
+
 );
+
+priceHistorySchema.index({ price: 1, updatedAt: 1});
 
 const PriceHistory = mongoose.model('PriceHistory', priceHistorySchema);
 
