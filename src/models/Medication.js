@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const medicationSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    genericName: { type: String, required: true, },
+    name: { type: String, required: true, trim: true, trim:true },
+    genericName: { type: String, trim: true, },
     category: { type: String, required: true },
     description: { type: String, required: true, },
   },

@@ -8,6 +8,7 @@ const providerSchema = new mongoose.Schema(
     },
     type: {
       type: String,
+      default: "pharmacy",
       enum: ["pharmacy", "lab", "care"],
       required: true,
     },
