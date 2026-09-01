@@ -1,5 +1,6 @@
 import Medication from "../models/Medication.js"; 
 import Price from "../models/Price.js";
+import PriceHistory from "../models/PriceHistory.js";
 
 const LIMIT = 10;
 const PAGE = 1;
@@ -91,4 +92,39 @@ export async function getMedication(req, res, next) {
     next(error);
   }
   
+}
+
+export async function medHistory(req, res, next) {
+  try {
+    const medication = await Medication.findById(req.params.id);
+    if (!medication) {
+      return res.status(404).json({ message: 'Medication not found' });
+    }
+
+    const prices = await Price.find({
+        itemType: "medication",
+        itemId: req.params.id
+      })
+      .populate("providerId", "name type trustBadge");
+    if(!prices) {
+      return res.status(404).json({ message: 'No prices found for this medication' });
+    }
+
+    const history = await PriceHistory.find({
+      itemId: req.params.id
+    })
+    .populate();
+    if (!history) {
+      return res.status(404).json({ message: 'No history found for this medication' });
+    }   
+
+    res.status(200).json({
+      success: true,
+      data: { ...medication._doc, prices, history },
+      message: "Price trend retrieved successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 }

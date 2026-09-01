@@ -1,5 +1,6 @@
 import Service from '../models/Service.js';
 import Price from '../models/Price.js';
+import PriceHistory from "../models/PriceHistory.js";
 
 export async function createService(req, res, next) {
   try {
@@ -80,6 +81,41 @@ export async function getService(req, res, next) {
     next(error);
   }
   
+}
+
+export async function serHistory(req, res, next) {
+  try {
+    const service = await Service.findById(req.params.id);
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    const prices = await Price.find({
+        itemType: "service",
+        itemId: req.params.id
+      })
+      .populate("providerId", "name type trustBadge");
+    if(!prices) {
+      return res.status(404).json({ message: 'No prices found for this service' });
+    }
+
+    const history = await PriceHistory.find({
+      itemId: req.params.id
+    })
+    .populate();
+    if (!history) {
+      return res.status(404).json({ message: 'No history found for this service' });
+    }   
+
+    res.status(200).json({
+      success: true,
+      data: { ...service._doc, prices, history },
+      message: "Price trend retrieved successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 }
 
 
