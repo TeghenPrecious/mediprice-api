@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const priceHistorySchema = new mongoose.Schema(
   {
-    price: {
+    priceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Price",
       required: true,
@@ -10,7 +10,7 @@ const priceHistorySchema = new mongoose.Schema(
     itemId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "itemType",
+      refPath: "itemId",
     },
     amount: {
       type: Number,
