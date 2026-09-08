@@ -1,6 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import swaggerUI from 'swagger-ui-express';
+import swaggerSpec from './src/config/swagger.js';
 
 import { connectDB } from './src/config/db.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
@@ -10,11 +14,19 @@ import serviceRoutes from './src/routes/service.routes.js';
 import priceRoutes from './src/routes/price.routes.js';
 import providerRoutes from './src/routes/provider.routes.js';
 import compareRoutes from './src/routes/compare.routes.js';
+import authRoutes from './src/routes/auth.routes.js';
 
 const app = express();
 
 app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use(express.json());
+
+app.use(
+  "/api-docs",
+  swaggerUI.serve,
+  swaggerUI.setup(swaggerSpec)
+);
+
 
 app.use('/api/health', healthRoutes);
 app.use('/api/medications', medicationRoutes);
@@ -22,6 +34,7 @@ app.use('/api/services', serviceRoutes)
 app.use('/api/prices', priceRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/compare', compareRoutes);
+app.use('/api/auth', authRoutes);
 
 // Fire off the DB connection without blocking server startup — connectDB
 // logs its own errors and never throws, so a missing/unreachable Mongo
