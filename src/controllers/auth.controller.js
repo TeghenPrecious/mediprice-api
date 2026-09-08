@@ -1,8 +1,6 @@
-import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { auth } from '../middleware/auth.js';
 
 export async function register(req, res, next) {
     try {
@@ -12,6 +10,8 @@ export async function register(req, res, next) {
 
         if (existingUser) {
             return res.status(400).json({
+                success: false,
+                data: null,
                 message: "User already exists"
             });
         }
@@ -21,7 +21,7 @@ export async function register(req, res, next) {
         const user = await User.create({
             name,
             email,
-            password: hashedPassword
+            passwordHash: hashedPassword
         });
 
         res.status(201).json({
@@ -48,17 +48,21 @@ export async function login(req, res, next) {
 
         if (!user) {
             return res.status(401).json({
+                success: false,
+                data: null,
                 message: "Invalid email or password"
             });
         }
 
         const isMatch = await bcrypt.compare(
             password,
-            user.password
+            user.passwordHash
         );
 
         if (!isMatch) {
             return res.status(401).json({
+                success: false,
+                data: null,
                 message: "Invalid email or password"
             });
         }
@@ -89,13 +93,5 @@ export async function login(req, res, next) {
 
     } catch (error) {
         next(error);
-    }
-}
-
-export async function authenticate(req, res, next) {
-    try {
-        
-    } catch (error) {
-        
     }
 }

@@ -9,7 +9,7 @@ const providerSchema = new mongoose.Schema(
     type: {
       type: String,
       default: "pharmacy",
-      enum: ["pharmacy", "lab", "care"],
+      enum: ["pharmacy", "lab", "hospital"],
       required: true,
     },
     quarter: String,

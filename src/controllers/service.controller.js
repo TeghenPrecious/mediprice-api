@@ -8,7 +8,7 @@ export async function createService(req, res, next) {
 
     // Validate required fields
     if (!name || !type || !category || !description) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ success: false, data: null, message: 'All fields are required' });
     }
 
     const newService = await Service.create({
@@ -19,8 +19,9 @@ export async function createService(req, res, next) {
     });
 
     res.status(201).json({
+      success: true,
+      data: newService,
       message: 'Service created successfully',
-      service: newService
     });
   } catch (error) {
     console.log(error);
@@ -39,37 +40,45 @@ export async function getServices(req, res, next) {
     if (category) filters.category = { $regex: category, $options: "i" };
     if (description) filters.description = { $regex: description, $options: "i" };
 
-    const service = await Service.find(filters);
-    if (!service) {
-      return res.status(404).json({ message: 'No service found' });
-    }
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+
+    const [service, total] = await Promise.all([
+      Service.find(filters)
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum),
+      Service.countDocuments(filters),
+    ]);
 
     res.status(200).json({
       success: true,
       data: service,
-      message: "Services retrieved successfully"
+      message: "Services retrieved successfully",
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
     });
   } catch (error) {
     console.log(error);
     next(error);
   }
-  
+
 }
 
 export async function getService(req, res, next) {
   try {
     const service = await Service.findById(req.params.id);
     if (!service) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ success: false, data: null, message: 'Service not found' });
     }
     const prices = await Price.find({
             itemType: "service",
             itemId: req.params.id
           })
           .populate("providerId", "name type");
-    if(!prices) {
-      return res.status(404).json({ message: 'No prices found for this service' });
-    }
 
     res.status(200).json({
       success: true,
@@ -87,7 +96,7 @@ export async function serHistory(req, res, next) {
   try {
     const service = await Service.findById(req.params.id);
     if (!service) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ success: false, data: null, message: 'Service not found' });
     }
 
     const prices = await Price.find({
@@ -95,17 +104,10 @@ export async function serHistory(req, res, next) {
         itemId: req.params.id
       })
       .populate("providerId", "name type trustBadge");
-    if(!prices) {
-      return res.status(404).json({ message: 'No prices found for this service' });
-    }
 
     const history = await PriceHistory.find({
       itemId: req.params.id
-    })
-    .populate();
-    if (!history) {
-      return res.status(404).json({ message: 'No history found for this service' });
-    }   
+    });
 
     res.status(200).json({
       success: true,

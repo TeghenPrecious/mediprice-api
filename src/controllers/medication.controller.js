@@ -9,10 +9,10 @@ const SORT = "name";
 export async function createMedication(req, res, next) {
   try {
     const { name, genericName, category, description } = req.body;
-    
+
     // Validate required fields
     if (!name || !genericName || !category || !description) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ success: false, data: null, message: 'All fields are required' });
     }
 
     const newMedication = await Medication.create({
@@ -23,8 +23,9 @@ export async function createMedication(req, res, next) {
     });
 
     res.status(201).json({
+      success: true,
+      data: newMedication,
       message: 'Medication created successfully',
-      medication: newMedication
     });
 
   } catch (error) {
@@ -35,10 +36,10 @@ export async function createMedication(req, res, next) {
 
 export async function getMedications(req, res, next) {
   try {
-    const { q, genericName, 
-      category, page=PAGE, 
-      // limit=LIMIT, sort=SORT, 
-      // priceMin, priceMax, 
+    const { q, genericName,
+      category, page=PAGE,
+      limit=LIMIT,
+      // sort=SORT, priceMin, priceMax,
       description,  } = req.query;
 
     const filters = {};
@@ -48,29 +49,39 @@ export async function getMedications(req, res, next) {
     if (category) filters.category = { $regex: category, $options: "i" };
     if (description) filters.description = { $regex: description, $options: "i" };
 
-    const medication = await Medication.find(filters);
-    if (!medication) {
-      return res.status(404).json({ message: 'No medication found' });
-    }
-    
+    const pageNum = Math.max(1, parseInt(page, 10) || PAGE);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || LIMIT));
+
+    const [medication, total] = await Promise.all([
+      Medication.find(filters)
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum),
+      Medication.countDocuments(filters),
+    ]);
 
     res.status(200).json({
       success: true,
       data: medication,
-      message: "Medications retrieved successfully"
+      message: "Medications retrieved successfully",
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
     });
   } catch (error) {
     console.log(error);
     next(error);
   }
-  
+
 }
 
 export async function getMedication(req, res, next) {
   try {
     const medication = await Medication.findById(req.params.id);
     if (!medication) {
-      return res.status(404).json({ message: 'Medication not found' });
+      return res.status(404).json({ success: false, data: null, message: 'Medication not found' });
     }
 
     const prices = await Price.find({
@@ -78,10 +89,7 @@ export async function getMedication(req, res, next) {
         itemId: req.params.id
       })
       .populate("providerId", "name type");
-    if(!prices) {
-      return res.status(404).json({ message: 'No prices found for this medication' });
-    }
-    
+
     res.status(200).json({
       success: true,
       data: { ...medication._doc, prices },
@@ -98,7 +106,7 @@ export async function medHistory(req, res, next) {
   try {
     const medication = await Medication.findById(req.params.id);
     if (!medication) {
-      return res.status(404).json({ message: 'Medication not found' });
+      return res.status(404).json({ success: false, data: null, message: 'Medication not found' });
     }
 
     const prices = await Price.find({
@@ -106,17 +114,10 @@ export async function medHistory(req, res, next) {
         itemId: req.params.id
       })
       .populate("providerId", "name type trustBadge");
-    if(!prices) {
-      return res.status(404).json({ message: 'No prices found for this medication' });
-    }
 
     const history = await PriceHistory.find({
       itemId: req.params.id
-    })
-    .populate();
-    if (!history) {
-      return res.status(404).json({ message: 'No history found for this medication' });
-    }   
+    });
 
     res.status(200).json({
       success: true,

@@ -9,7 +9,7 @@ export async function createProvider(req, res, next) {
 
     // Validate required fields
     if (!name || !type || !phone) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ success: false, data: null, message: 'All fields are required' });
     }
 
     const newProvider = await Provider.create({
@@ -19,8 +19,9 @@ export async function createProvider(req, res, next) {
     });
 
     res.status(201).json({
+      success: true,
+      data: newProvider,
       message: 'Provider created successfully',
-      provider: newProvider
     });
   } catch (error) {
     console.log(error);
@@ -39,9 +40,6 @@ export async function getProviders(req, res, next) {
     if (city) filters.city = { $regex: city, $options: "i" };
 
     const provider = await Provider.find(filters);
-    if (!provider) {
-      return res.status(404).json({ message: 'No provider found' });
-    }
 
     res.status(200).json({
       success: true,
@@ -59,12 +57,9 @@ export async function getProvider(req, res, next) {
   try {
     const provider = await Provider.findById(req.params.id);
     if (!provider) {
-      return res.status(404).json({ message: 'Provider not found' });
+      return res.status(404).json({ success: false, data: null, message: 'Provider not found' });
     }
     const price = await Price.find({ providerId: req.params.id });
-    if (!price) {
-      return res.status(404).json({ message: 'Price not found' });
-    }
     res.status(200).json({
       success: true,
       data: {provider, price},
