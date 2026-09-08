@@ -4,6 +4,9 @@
   "description": "REST API for MediPrice Cameroon: medication, lab test, and care price transparency. Search a drug, lab test, or service and compare prices across pharmacies, laboratories, and hospitals in Bamenda — every price carries a trust badge (SEED-verified / provider-verified / community-reported) and a last-updated date.",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
